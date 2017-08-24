@@ -1,7 +1,8 @@
 #!/usr/bin/env php
 <?php
 
-use Php\Args;
+use Syn\Dispatch\Registry;
+use Syn\Php\Args;
 
 // run main() and exit
 exit(main($argv));
@@ -86,8 +87,8 @@ function syn($argv, $global)
   if ($opts === false)
     throw new RuntimeException('Unable to process options');
 
-  foreach ($opts as $opt) {
-    switch ($opt) {
+  foreach ($opts as $name => $value) {
+    switch ($name) {
       case 'd':
       case 'debug':
         $global->debug = true;
@@ -100,7 +101,7 @@ function syn($argv, $global)
   //
 
   // determine first non-switch argument
-  $optind = 1;
+  $optind = -1;
   foreach ($argv as $index => $arg) {
     // skip argv[0] and all switches
     if ($index === 0 || $arg[0] === '-')
@@ -111,15 +112,21 @@ function syn($argv, $global)
     break;
   }
 
-  // mux off the topic
-  $topic = $argv[$optind];
-  switch ($topic)
-  {
-    default:
-      return usage("Unknown topic: \"$topic\"");
-  }
+  if ($optind < 0)
+    return usage('No topic specified');
 
-  return 0;
+  // mux off the topic
+  $topic = $argv[$optind++];
+  $cmd = ($optind < count($argv)) ? $argv[$optind++] : null;
+  $params = array_slice($argv, $optind);
+
+  $dispatcher = Registry::instance()->lookup($topic);
+  if (!$dispatcher)
+    return usage("Unknown topic \"$topic\"");
+
+  $result = $dispatcher->dispatch($cmd, $params);
+
+  return is_string($result) ? usage($result) : intval($result);
 }
 
 /**
@@ -133,14 +140,18 @@ function usage($msg = null)
   Args::opt_string($msg);
 
   if (!isset($msg))
-    $msg = 'Synology DSM tool';
+    $msg = 'syn: Synology DSM tool';
 
+  // TODO: Use Registry and dispatchers to construct help
   echo <<<EOS
-syn: $msg
+$msg
 
 usage: syn <topic> [ arguments... ]
 
 topics:
+  config|configure        Configure syn
+
+config:
 EOS;
   echo "\n";
 
