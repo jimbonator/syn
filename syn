@@ -1,0 +1,148 @@
+#!/usr/bin/env php
+<?php
+
+use Php\Args;
+
+// run main() and exit
+exit(main($argv));
+
+/**
+ * int main(int argc, char *argv[])
+ *
+ * This prepares the runtime environment and calls syn(), which is the main program logic.
+ *
+ * @param array $argv
+ * @return int
+ */
+function main($argv)
+{
+  // "global" variables
+  $global = (object) [
+    'debug' => false,
+  ];
+
+  $ec = 0;
+  try {
+    // install the autoloader handler
+    install_autoloader($global);
+
+    // call the main code
+    $ec = syn($argv, $global);
+  } catch (Exception $e) {
+    fprintf(STDERR, "syn: %s\n", $e->getMessage());
+    if ($global->debug)
+      fprintf(STDERR, "%s\n", $e->getTraceAsString());
+
+    // ensure non-zero value is returned
+    $ec = ($e->getCode() !== 0) ? $e->getCode() : 1;
+  }
+
+  return $ec;
+}
+
+/**
+ * Install syn autoloader.
+ *
+ * Because this is initializing the code that loads classes, this function can't refer to those
+ * classes directly.
+ */
+function install_autoloader($global)
+{
+  spl_autoload_register(function ($classname) use ($global) {
+    // namespace backslashes to directory separators
+    $relpath = str_replace('\\', DIRECTORY_SEPARATOR, $classname);
+
+    $require = __DIR__ . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . $relpath . '.inc';
+    if (!file_exists($require))
+      throw new RuntimeException("Unable to autoload class $classname: \"$require\" not found");
+
+    require_once $require;
+  });
+}
+
+/**
+ * syn program.
+ *
+ * @param array $argv
+ * @param object $global
+ * @return int
+ * @throws Exception
+ */
+function syn($argv, $global)
+{
+  Args::req_array($argv);
+  Args::req_object($global);
+
+  if (count($argv) < 2)
+    return usage();
+
+  //
+  // command-line switches
+  //
+  // TODO: detect unknown command-line switches and report error
+  //
+
+  $opts = getopt('d', [ 'debug' ]);
+  if ($opts === false)
+    throw new RuntimeException('Unable to process options');
+
+  foreach ($opts as $opt) {
+    switch ($opt) {
+      case 'd':
+      case 'debug':
+        $global->debug = true;
+      break;
+    }
+  }
+
+  //
+  // command-line arguments
+  //
+
+  // determine first non-switch argument
+  $optind = 1;
+  foreach ($argv as $index => $arg) {
+    // skip argv[0] and all switches
+    if ($index === 0 || $arg[0] === '-')
+      continue;
+
+    $optind = $index;
+
+    break;
+  }
+
+  // mux off the topic
+  $topic = $argv[$optind];
+  switch ($topic)
+  {
+    default:
+      return usage("Unknown topic: \"$topic\"");
+  }
+
+  return 0;
+}
+
+/**
+ * Print tool usage.
+ *
+ * @param string|null $msg
+ * @return 1
+ */
+function usage($msg = null)
+{
+  Args::opt_string($msg);
+
+  if (!isset($msg))
+    $msg = 'Synology DSM tool';
+
+  echo <<<EOS
+syn: $msg
+
+usage: syn <topic> [ arguments... ]
+
+topics:
+EOS;
+  echo "\n";
+
+  return 1;
+}
