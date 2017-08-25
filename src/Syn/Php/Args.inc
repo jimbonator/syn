@@ -45,6 +45,18 @@ class Args
   }
 
   /**
+   * Tests for an arbitrary condition.
+   *
+   * @param boolean $test
+   * @throws InvalidArgumentException
+   */
+  public static function requires($test)
+  {
+    if (!$test)
+      throw new InvalidArgumentException('Argument requirement failed');
+  }
+
+  /**
    * Requires $mixed to be a boolean.
    */
   public static function req_bool($mixed)

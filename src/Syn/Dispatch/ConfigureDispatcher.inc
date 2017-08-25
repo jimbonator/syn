@@ -46,6 +46,12 @@ class ConfigureDispatcher extends AbstractDispatcher
     $config->load();
     $config->set_endpoint($kv);
     $config->save();
+
+    $endpoint = $config->endpoint();
+    if (!isset($endpoint))
+      return 'Endpoint not saved';
+
+    echo "Endpoint: $endpoint\n";
   }
 
   /**

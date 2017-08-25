@@ -70,57 +70,27 @@ class Config
    */
   public function save()
   {
-    $ini = '';
+    $ini = new IniWriter();
 
-    static::write_comment($ini, 'syn configuration file');
-    static::write_comment($ini, "DO NOT MODIFY UNLESS YOU KNOW WHAT YOU'RE DOING");
+    $ini->comment('syn configuration file');
+    $ini->comment("DO NOT MODIFY UNLESS YOU KNOW WHAT YOU'RE DOING");
+
     foreach ($this->config as $key => $value) {
       if (is_array($value)) {
-        static::write_section($ini, $key);
+        $ini->section($key);
         foreach ($value as $seckey => $secvalue)
-          static::write_key($ini, $seckey, $secvalue);
+          $ini->key_value($seckey, $secvalue);
       } else {
-        static::write_key($ini, $key, $value);
+        $ini->key_value($key, $value);
       }
     }
 
     $umask = umask(077);
     try {
-      if (file_put_contents($this->file, $ini, LOCK_EX) === false)
-        throw new IOException("Unable to write to {$this->file}");
+      $ini->write($this->file);
     } finally {
       umask($umask);
     }
-  }
-
-  private static function write_comment(&$ini, $comment)
-  {
-    Args::req_string($ini);
-    Args::opt_string($comment);
-
-    $ini .= '; ';
-    if (isset($comment))
-      $ini .= $comment;
-    $ini .= "\n";
-  }
-
-  private static function write_section(&$ini, $section)
-  {
-    Args::req_string($ini);
-    Args::req_string($section);
-
-    $ini .= "\n[$section]\n";
-  }
-
-  private static function write_key(&$ini, $key, $value)
-  {
-    Args::req_string($ini);
-    Args::req_string($key);
-    Args::req_scalar($value);
-
-    $ini .= "$key=";
-    $ini .= (is_numeric($value) ? $value : "\"$value\"");
-    $ini .= "\n";
   }
 
   /**
