@@ -17,6 +17,7 @@ class Registry
    */
   public static $DISPATCHERS = [
     ConfigureDispatcher::class,
+    InfoDispatcher::class,
   ];
 
   private $map = [];
