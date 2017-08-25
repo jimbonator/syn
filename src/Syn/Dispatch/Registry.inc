@@ -62,6 +62,6 @@ class Registry
 
     $dispatch_class = Arrays::optional($this->map, $topic);
 
-    return isset($dispatch_class) ? $dispatch_class::factory($topic) : null;
+    return isset($dispatch_class) ? new $dispatch_class($topic) : null;
   }
 }

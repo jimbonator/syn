@@ -38,14 +38,6 @@ abstract class AbstractDispatcher
   public abstract static function topics();
 
   /**
-   * Returns an instance of this dispatcher.
-   *
-   * @param string $topic
-   * @return Dispatcher
-   */
-  public abstract static function factory($topic);
-
-  /**
    * Dispatch (execute) the command.
    *
    * @param string|NULL $cmd

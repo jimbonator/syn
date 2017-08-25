@@ -21,14 +21,6 @@ class ConfigureDispatcher extends AbstractDispatcher
     return [ 'config', 'configure' ];
   }
 
-  /**
-   * @see Dispatcher::factory()
-   */
-  public static function factory($topic)
-  {
-    return new ConfigureDispatcher($topic);
-  }
-
   protected function cmd_default($params)
   {
     $storage = Storage::for_current_user();
@@ -47,7 +39,7 @@ class ConfigureDispatcher extends AbstractDispatcher
     $port = Arrays::optional($params, 1, Storage::DEFAULT_PORT);
 
     $storage = Storage::for_current_user();
-    $storage->set_hostinfo($host, $port);
+    $storage->set_hostinfo($host, intval($port));
 
     $storage->save();
   }
