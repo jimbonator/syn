@@ -9,6 +9,9 @@ use Syn\Storage\Config;
 
 /**
  * Dispatcher for "config" topic.
+ *
+ * $cmd corresponds to the Config set_* method (which, in turn, corresponds to sections in the
+ * configuration file).  Parameters are in the form "key=value".
  */
 
 class ConfigureDispatcher extends AbstractDispatcher
@@ -28,19 +31,43 @@ class ConfigureDispatcher extends AbstractDispatcher
 
     $endpoint = $config->endpoint();
     if (!isset($endpoint))
-      return 'No host information configured';
+      return 'No host endpoint configured';
 
     echo "Endpoint: $endpoint\n";
   }
 
   protected function cmd_endpoint($params)
   {
-    $host = Arrays::required($params, 0, new ReportableException('host parameter required'));
-    $port = Arrays::optional($params, 1, Config::DEFAULT_PORT);
+    Args::req_array($params);
+
+    $kv = static::cmdline_to_keyvalue($params);
 
     $config = Config::for_current_user();
-    $config->set_hostinfo($host, intval($port));
-
+    $config->load();
+    $config->set_endpoint($kv);
     $config->save();
+  }
+
+  /**
+   * Converts command-line arguments to an array of key-value pairs.
+   *
+   * @param array $params
+   * @return array
+   * @throws ReportableException
+   */
+  private static function cmdline_to_keyvalue($params)
+  {
+    Args::req_array($params);
+
+    $kv = [];
+    foreach ($params as $param) {
+      $split = explode('=', $param, 2);
+      if (count($split) != 2)
+        throw new ReportableException('Configuration is in the form of "key=value"');
+
+      $kv[$split[0]] = $split[1];
+    }
+
+    return $kv;
   }
 }

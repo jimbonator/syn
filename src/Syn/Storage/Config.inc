@@ -3,6 +3,7 @@
 namespace Syn\Storage;
 
 use Syn\Exception\IOException;
+use Syn\Exception\ReportableException;
 use Syn\Php\Args;
 use Syn\Php\Arrays;
 use Syn\Php\File;
@@ -15,6 +16,8 @@ use Syn\Transport\Endpoint;
 class Config
 {
   const HOME_FILENAME = '.syn';
+
+  const DEFAULT_PROTO = 'http';
   const DEFAULT_PORT = 5000;
 
   private $file;
@@ -81,8 +84,13 @@ class Config
       }
     }
 
-    if (file_put_contents($this->file, $ini, LOCK_EX) === false)
-      throw new IOException("Unable to write to {$this->file}");
+    $umask = umask(077);
+    try {
+      if (file_put_contents($this->file, $ini, LOCK_EX) === false)
+        throw new IOException("Unable to write to {$this->file}");
+    } finally {
+      umask($umask);
+    }
   }
 
   private static function write_comment(&$ini, $comment)
@@ -119,31 +127,43 @@ class Config
    * API endpoint.
    *
    * @return Endpoint|null
+   * @throws ReportableException
    */
   public function endpoint()
   {
-    $hostinfo = Arrays::optional($this->config, 'hostinfo');
-    if (!is_array($hostinfo) || empty($hostinfo))
-      return null;
+    $endpoint = Arrays::required($this->config, 'endpoint', new ReportableException('No endpoint configured'));
 
-    // port default
-    if (!isset($hostinfo['port']))
-      $hostinfo['port'] = self::DEFAULT_PORT;
+    $host = Arrays::required($endpoint, 'host', new ReportableException('No host configured'));
+    $port = Arrays::optional($endpoint, 'port', static::DEFAULT_PORT);
+    $proto = Arrays::optional($endpoint, 'proto', static::DEFAULT_PROTO);
 
-    return new Endpoint($hostinfo['host'], intval($hostinfo['port']));
+    return new Endpoint($host, $port, $proto);
   }
 
   /**
-   * Set host information.
+   * Set API endpoint.
    *
-   * @param string $host
-   * @param int $port
+   * Required parameters: host
+   * Optional parameters: port, proto
+   *
+   * @param array $kv
+   * @throws ReportableException
    */
-  public function set_hostinfo($host, $port = self::DEFAULT_PORT)
+  public function set_endpoint($kv)
   {
-    Args::req_string($host);
-    Args::req_int($port);
+    Args::req_array($kv);
 
-    $this->config['hostinfo'] = [ 'host' => $host, 'port' => $port ];
+    $endpoint = Arrays::optional($this->config, 'endpoint', []);
+
+    Arrays::assign_if_set($endpoint, $kv, 'host');
+    Arrays::assign_if_set($endpoint, $kv, 'port');
+    Arrays::assign_if_set($endpoint, $kv, 'proto');
+
+    Arrays::required($endpoint, 'host', new ReportableException('"host" parameter required'));
+    $proto = Arrays::optional($endpoint, 'proto');
+    if ($proto && !in_array($proto, [ 'http', 'https' ]))
+      throw new ReportableException('"proto" parameter may only be "http" or "https"');
+
+    $this->config['endpoint'] = $endpoint;
   }
 }

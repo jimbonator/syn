@@ -46,4 +46,26 @@ class Arrays
 
     return isset($arr[$key]) ? $arr[$key] : $default;
   }
+
+  /**
+   * Assign the for value $key to $src if present in $dst.
+   *
+   * @param &array $dst
+   * @param array $src
+   * @param string $key
+   * @return boolean            If assigned
+   */
+  public static function assign_if_set(&$dst, $src, $key)
+  {
+    Args::req_array($dst);
+    Args::req_array($src);
+    Args::opt_scalar($key);
+
+    if (!isset($src[$key]))
+      return false;
+
+    $dst[$key] = $src[$key];
+
+    return true;
+  }
 }

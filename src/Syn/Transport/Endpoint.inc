@@ -28,15 +28,16 @@ class Endpoint
   /**
    * @param string $host
    * @param int $port
+   * @param string $proto
    */
   public function __construct($host, $port, $proto = 'http')
   {
     Args::req_string($host);
-    Args::req_int($port);
+    Args::req_intable($port);
     Args::req_string($proto);
 
     $this->host = $host;
-    $this->port = $port;
+    $this->port = intval($port);
     $this->proto = $proto;
   }
 

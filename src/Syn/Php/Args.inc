@@ -11,6 +11,28 @@ use InvalidArgumentException;
 class Args
 {
   /**
+   * Tests if a value is int-able.
+   *
+   * "Int-able" is defined as an integer or a string that may be converted to an integer with or
+   * without loss of precision.  If floats are acceptable, consider using the *_numeric tests (TBD).
+   *
+   * As with is_numeric(), it's possible for a string to contain more digits than is representable
+   * as an integer.  This may be changed in the future.
+   *
+   * NULL and booleans are not considered int-able.
+   *
+   * @param mixed $mixed
+   * @return boolean
+   */
+  public static function is_intable($mixed)
+  {
+    if (is_int($mixed))
+      return true;
+
+    return is_string($mixed) && preg_match('/^\s*([-+]?)\d+\s*$/', $mixed);
+  }
+
+  /**
    * Determines if $mixed may be coerced into a string.
    *
    * NULL is not considered coercible to a string for argument-checking purposes.
@@ -52,6 +74,22 @@ class Args
   public static function opt_int($mixed)
   {
     static::opt($mixed, 'is_int', 'Argument is not an integer or NULL');
+  }
+
+  /**
+   * Requires $mixed to be coercible to an integer.
+   */
+  public static function req_intable($mixed)
+  {
+    static::req($mixed, 'static::is_intable', 'Argument is not coercible to an integer');
+  }
+
+  /**
+   * Requires $mixed to be coercible to an integer or NULL.
+   */
+  public static function opt_intable($mixed)
+  {
+    static::opt($mixed, 'static::is_intable', 'Argument is not coercible to an integer or NULL');
   }
 
   /**
