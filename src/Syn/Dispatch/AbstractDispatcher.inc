@@ -2,6 +2,7 @@
 
 namespace Syn\Dispatch;
 
+use Syn\Exception\ReportableException;
 use Syn\Php\Args;
 
 /**
@@ -64,6 +65,10 @@ abstract class AbstractDispatcher
     if (!method_exists($this, $method))
       return "{$this->topic}: Unknown command \"$cmd\"";
 
-    return $this->{$method}($params);
+    try {
+      return $this->{$method}($params);
+    } catch (ReportableException $re) {
+      return sprintf("%s %s: %s", $this->topic, $cmd, $re->getMessage());
+    }
   }
 }

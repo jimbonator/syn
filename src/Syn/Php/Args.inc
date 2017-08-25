@@ -11,6 +11,34 @@ use InvalidArgumentException;
 class Args
 {
   /**
+   * Determines if $mixed may be coerced into a string.
+   *
+   * NULL is not considered coercible to a string for argument-checking purposes.
+   *
+   * @return boolean
+   */
+  public static function is_stringable($mixed)
+  {
+    return is_scalar($mixed) || (is_object($mixed) && method_exists($mixed, '__toString'));
+  }
+
+  /**
+   * Requires $mixed to be an integer.
+   */
+  public static function req_int($mixed)
+  {
+    static::req($mixed, 'is_int', 'Argument is not an integer');
+  }
+
+  /**
+   * Requires $mixed to be an integer or NULL.
+   */
+  public static function opt_int($mixed)
+  {
+    static::opt($mixed, 'is_int', 'Argument is not an integer or NULL');
+  }
+
+  /**
    * Requires $mixed to be a string.
    */
   public static function req_string($mixed)
@@ -24,6 +52,22 @@ class Args
   public static function opt_string($mixed)
   {
     static::opt($mixed, 'is_string', 'Argument is not a string or NULL');
+  }
+
+  /**
+   * Requires $mixed to be coerced to a string.
+   */
+  public static function req_stringable($mixed)
+  {
+    static::req($mixed, 'static::is_stringable', 'Argument is not coercible to a string');
+  }
+
+  /**
+   * Requires $mixed to be coerced to a string or NULL.
+   */
+  public static function opt_stringable($mixed)
+  {
+    static::opt($mixed, 'static::is_stringable', 'Argument is not coercible to a string or NULL');
   }
 
   /**

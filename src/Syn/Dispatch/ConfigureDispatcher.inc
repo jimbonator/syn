@@ -2,8 +2,10 @@
 
 namespace Syn\Dispatch;
 
-use RuntimeException;
+use Syn\Config\Storage;
+use Syn\Exception\ReportableException;
 use Syn\Php\Args;
+use Syn\Php\Arrays;
 
 /**
  * Dispatcher for "config" topic.
@@ -11,8 +13,6 @@ use Syn\Php\Args;
 
 class ConfigureDispatcher extends AbstractDispatcher
 {
-  const DEFAULT_PORT = 5000;
-
   /**
    * @see Dispatcher::topics()
    */
@@ -31,12 +31,24 @@ class ConfigureDispatcher extends AbstractDispatcher
 
   protected function cmd_default($params)
   {
-    echo "configure\n";
+    $storage = Storage::for_current_user();
+    $storage->load();
+
+    $hostinfo = $storage->hostinfo();
+    if (!isset($hostinfo) || empty($hostinfo))
+      return 'No host information configured';
+
+    echo "Host: {$hostinfo['host']}:{$hostinfo['port']}\n";
   }
 
-  protected function cmd_set_host($params)
+  protected function cmd_hostinfo($params)
   {
-    $host = Arrays::required($params, 'host', new RuntimeException('host parameter required'));
-    $port = Arrays::optional($params, 'port', static::DEFAULT_PORT);
+    $host = Arrays::required($params, 0, new ReportableException('host parameter required'));
+    $port = Arrays::optional($params, 1, Storage::DEFAULT_PORT);
+
+    $storage = Storage::for_current_user();
+    $storage->set_hostinfo($host, $port);
+
+    $storage->save();
   }
 }
