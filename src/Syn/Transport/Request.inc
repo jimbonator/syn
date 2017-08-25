@@ -59,8 +59,15 @@ class Request
     $info = curl_getinfo($this->ch);
 
     if ($json === false)
-      throw new IOException(curl_error(), curl_errno());
+      throw $this->io_exception();
 
     return json_decode($json);
+  }
+
+  private function io_exception()
+  {
+    $msg = sprintf("%s (%d): %s", curl_error($this->ch), curl_errno($this->ch), $this->endpoint);
+
+    return new IOException($msg, curl_errno($this->ch));
   }
 }

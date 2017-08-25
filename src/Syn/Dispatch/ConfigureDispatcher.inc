@@ -26,14 +26,14 @@ class ConfigureDispatcher extends AbstractDispatcher
     $storage = Storage::for_current_user();
     $storage->load();
 
-    $hostinfo = $storage->hostinfo();
-    if (!isset($hostinfo) || empty($hostinfo))
+    $endpoint = $storage->endpoint();
+    if (!isset($endpoint))
       return 'No host information configured';
 
-    echo "Host: {$hostinfo['host']}:{$hostinfo['port']}\n";
+    echo "Endpoint: $endpoint\n";
   }
 
-  protected function cmd_hostinfo($params)
+  protected function cmd_endpoint($params)
   {
     $host = Arrays::required($params, 0, new ReportableException('host parameter required'));
     $port = Arrays::optional($params, 1, Storage::DEFAULT_PORT);

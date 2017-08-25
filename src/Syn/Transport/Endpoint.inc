@@ -43,18 +43,31 @@ class Endpoint
   /**
    * The API URL for this endpoint.
    *
-   * @param string $cgi
+   * $params is ignored if $cgi is NULL.
+   *
+   * @param string|null $cgi
    * @param array|NULL $params
    * @return string
    */
-  public function url($cgi, $params = null)
+  public function url($cgi = null, $params = null)
   {
-    Args::req_string($cgi);
+    Args::opt_string($cgi);
     Args::opt_array($params);
+
+    if (!isset($cgi))
+      return "{$this->proto}://{$this->host}:{$this->port}";
 
     if (isset($params) && !empty($params))
       $query = '?' . http_build_query($params);
 
     return "{$this->proto}://{$this->host}:{$this->port}/webapi/$cgi$query";
+  }
+
+  /**
+   * Returns Endpoint as a human-readable string.
+   */
+  public function __toString()
+  {
+    return $this->url();
   }
 }

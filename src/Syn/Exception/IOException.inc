@@ -2,6 +2,8 @@
 
 namespace Syn\Exception;
 
+use Exception;
+
 /**
  * I/O-related errors.
  */
