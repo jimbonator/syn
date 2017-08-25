@@ -2,8 +2,8 @@
 
 namespace Syn\Dispatch;
 
-use Syn\Config\Storage;
 use Syn\Php\Args;
+use Syn\Storage\Config;
 use Syn\Transport\Request;
 
 /**
@@ -22,10 +22,10 @@ class InfoDispatcher extends AbstractDispatcher
 
   protected function cmd_default($params)
   {
-    $storage = Storage::for_current_user();
-    $storage->load();
+    $config = Config::for_current_user();
+    $config->load();
 
-    $endpoint = $storage->endpoint();
+    $endpoint = $config->endpoint();
     if (!$endpoint)
       return 'Not configured';
 

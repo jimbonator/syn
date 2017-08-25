@@ -2,10 +2,10 @@
 
 namespace Syn\Dispatch;
 
-use Syn\Config\Storage;
 use Syn\Exception\ReportableException;
 use Syn\Php\Args;
 use Syn\Php\Arrays;
+use Syn\Storage\Config;
 
 /**
  * Dispatcher for "config" topic.
@@ -23,10 +23,10 @@ class ConfigureDispatcher extends AbstractDispatcher
 
   protected function cmd_default($params)
   {
-    $storage = Storage::for_current_user();
-    $storage->load();
+    $config = Config::for_current_user();
+    $config->load();
 
-    $endpoint = $storage->endpoint();
+    $endpoint = $config->endpoint();
     if (!isset($endpoint))
       return 'No host information configured';
 
@@ -36,11 +36,11 @@ class ConfigureDispatcher extends AbstractDispatcher
   protected function cmd_endpoint($params)
   {
     $host = Arrays::required($params, 0, new ReportableException('host parameter required'));
-    $port = Arrays::optional($params, 1, Storage::DEFAULT_PORT);
+    $port = Arrays::optional($params, 1, Config::DEFAULT_PORT);
 
-    $storage = Storage::for_current_user();
-    $storage->set_hostinfo($host, intval($port));
+    $config = Config::for_current_user();
+    $config->set_hostinfo($host, intval($port));
 
-    $storage->save();
+    $config->save();
   }
 }

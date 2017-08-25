@@ -1,6 +1,6 @@
 <?php
 
-namespace Syn\Config;
+namespace Syn\Storage;
 
 use Syn\Exception\IOException;
 use Syn\Php\Args;
@@ -12,7 +12,7 @@ use Syn\Transport\Endpoint;
  *
  */
 
-class Storage
+class Config
 {
   const HOME_FILENAME = '.syn';
   const DEFAULT_PORT = 5000;
