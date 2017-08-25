@@ -6,6 +6,7 @@ use Syn\Exception\IOException;
 use Syn\Php\Args;
 use Syn\Php\Arrays;
 use Syn\Php\File;
+use Syn\Transport\Endpoint;
 
 /**
  *
@@ -115,11 +116,11 @@ class Storage
   }
 
   /**
-   * Host information.
+   * API endpoint.
    *
-   * @return array|null       'host', 'port' keys
+   * @return Endpoint|null
    */
-  public function hostinfo()
+  public function endpoint()
   {
     $hostinfo = Arrays::optional($this->config, 'hostinfo');
     if (!is_array($hostinfo) || empty($hostinfo))
@@ -129,10 +130,7 @@ class Storage
     if (!isset($hostinfo['port']))
       $hostinfo['port'] = self::DEFAULT_PORT;
 
-    // port as integer
-    $hostinfo['port'] = intval($hostinfo['port']);
-
-    return $hostinfo;
+    return new Endpoint($hostinfo['host'], intval($hostinfo['port']));
   }
 
   /**

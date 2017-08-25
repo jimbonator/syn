@@ -23,6 +23,22 @@ class Args
   }
 
   /**
+   * Requires $mixed to be a boolean.
+   */
+  public static function req_bool($mixed)
+  {
+    static::req($mixed, 'is_bool', 'Argument is not a boolean');
+  }
+
+  /**
+   * Requires $mixed to be a boolean or NULL.
+   */
+  public static function opt_bool($mixed)
+  {
+    static::opt($mixed, 'is_bool', 'Argument is not a boolean or NULL');
+  }
+
+  /**
    * Requires $mixed to be an integer.
    */
   public static function req_int($mixed)
