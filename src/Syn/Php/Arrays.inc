@@ -53,18 +53,20 @@ class Arrays
    * @param &array $dst
    * @param array $src
    * @param string $key
+   * @param callable $converter
    * @return boolean            If assigned
    */
-  public static function assign_if_set(&$dst, $src, $key)
+  public static function assign_if_set(&$dst, $src, $key, $converter = null)
   {
     Args::req_array($dst);
     Args::req_array($src);
     Args::opt_scalar($key);
+    Args::opt_callable($converter);
 
     if (!isset($src[$key]))
       return false;
 
-    $dst[$key] = $src[$key];
+    $dst[$key] = $converter ? $converter($src[$key]) : $src[$key];
 
     return true;
   }

@@ -32,8 +32,8 @@ class ConnectionParams
 
   public function set_verify_ssl($verify_ssl)
   {
-    if (is_bool($verify_ssl))
-      $this->verify_ssl = $verify_ssl;
+    if (isset($verify_ssl))
+      $this->verify_ssl = boolval($verify_ssl);
   }
 
   /**

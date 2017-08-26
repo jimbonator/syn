@@ -144,7 +144,7 @@ class Config
     $endpoint = Arrays::optional($this->config, 'endpoint', []);
 
     Arrays::assign_if_set($endpoint, $kv, 'host');
-    Arrays::assign_if_set($endpoint, $kv, 'port');
+    Arrays::assign_if_set($endpoint, $kv, 'port', 'intval');
     Arrays::assign_if_set($endpoint, $kv, 'proto');
 
     Arrays::required($endpoint, 'host', new ReportableException('"host" parameter required'));
@@ -169,9 +169,9 @@ class Config
 
     $cx = Arrays::optional($this->config, 'cx', []);
 
-    Arrays::assign_if_set($cx, $kv, 'connect-timeout');
-    Arrays::assign_if_set($cx, $kv, 'timeout');
-    Arrays::assign_if_set($cx, $kv, 'verify-ssl');
+    Arrays::assign_if_set($cx, $kv, 'connect-timeout', 'intval');
+    Arrays::assign_if_set($cx, $kv, 'timeout', 'intval');
+    Arrays::assign_if_set($cx, $kv, 'verify-ssl', 'Syn\Storage\IniWriter::boolval');
 
     if (count($cx))
       $this->config['cx'] = $cx;

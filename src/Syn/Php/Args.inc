@@ -195,6 +195,22 @@ class Args
   }
 
   /**
+   * Requires $mixed to be a callable.
+   */
+  public static function req_callable($mixed)
+  {
+    static::req($mixed, 'is_callable', 'Argument is not a callable');
+  }
+
+  /**
+   * Requires $mixed to be a callable or NULL.
+   */
+  public static function opt_callable($mixed)
+  {
+    static::opt($mixed, 'is_callable', 'Argument is not a callable or NULL');
+  }
+
+  /**
    * Requires $mixed to be NULL or an object instance of the specified class, trait, or interface.
    */
   public static function opt_is_a($mixed, $class)
