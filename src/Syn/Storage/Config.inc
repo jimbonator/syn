@@ -7,6 +7,7 @@ use Syn\Exception\ReportableException;
 use Syn\Php\Args;
 use Syn\Php\Arrays;
 use Syn\Php\File;
+use Syn\Transport\ConnectionParams;
 use Syn\Transport\Endpoint;
 
 /**
@@ -111,6 +112,23 @@ class Config
   }
 
   /**
+   * API connection parameters.
+   *
+   * @return ConnectionParams
+   */
+  public function connection_params()
+  {
+    $cx = Arrays::optional($this->config, 'cx', []);
+
+    $params = new ConnectionParams();
+    $params->set_connect_timeout(Arrays::optional($cx, 'connect-timeout'));
+    $params->set_timeout_sec(Arrays::optional($cx, 'timeout'));
+    $params->set_verify_ssl(Arrays::optional($cx, 'verify-ssl'));
+
+    return $params;
+  }
+
+  /**
    * Set API endpoint.
    *
    * Required parameters: host
@@ -135,5 +153,27 @@ class Config
       throw new ReportableException('"proto" parameter may only be "http" or "https"');
 
     $this->config['endpoint'] = $endpoint;
+  }
+
+  /**
+   * Set API connection parameters.
+   *
+   * Optional parameters: connect-timeout, timeout, verify-ssl
+   *
+   * @param array $kv
+   * @throws ReportableException
+   */
+  public function set_connection_params($kv)
+  {
+    Args::req_array($kv);
+
+    $cx = Arrays::optional($this->config, 'cx', []);
+
+    Arrays::assign_if_set($cx, $kv, 'connect-timeout');
+    Arrays::assign_if_set($cx, $kv, 'timeout');
+    Arrays::assign_if_set($cx, $kv, 'verify-ssl');
+
+    if (count($cx))
+      $this->config['cx'] = $cx;
   }
 }

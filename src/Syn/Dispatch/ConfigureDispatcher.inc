@@ -31,9 +31,12 @@ class ConfigureDispatcher extends AbstractDispatcher
 
     $endpoint = $config->endpoint();
     if (!isset($endpoint))
-      return 'No host endpoint configured';
+      $endpoint = 'Not configured';
 
-    echo "Endpoint: $endpoint\n";
+    $connection = $config->connection_params();
+
+    echo "Endpoint:\t$endpoint\n";
+    echo "Connection:\t$connection\n";
   }
 
   protected function cmd_endpoint($params)
@@ -49,9 +52,25 @@ class ConfigureDispatcher extends AbstractDispatcher
 
     $endpoint = $config->endpoint();
     if (!isset($endpoint))
-      return 'Endpoint not saved';
+      $endpoint = 'Not saved';
 
     echo "Endpoint: $endpoint\n";
+  }
+
+  protected function cmd_connection($params)
+  {
+    Args::req_array($params);
+
+    $kv = static::cmdline_to_keyvalue($params);
+
+    $config = Config::for_current_user();
+    $config->load();
+    $config->set_connection_params($kv);
+    $config->save();
+
+    $connection = $config->connection_params();
+
+    echo "Connection: $connection\n";
   }
 
   /**
