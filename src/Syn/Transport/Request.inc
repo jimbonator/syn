@@ -50,7 +50,7 @@ class Request
   {
     Args::req_is_a($cx_params, ConnectionParams::class);
 
-    $this->cx_params = $cx_params);
+    $this->cx_params = $cx_params;
   }
 
   public function exec()
@@ -66,8 +66,8 @@ class Request
     curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT_MS, $this->cx_params->connect_timeout_sec * 1000);
     curl_setopt($this->ch, CURLOPT_TIMEOUT_MS, $this->cx_params->timeout_sec * 1000);
 
-    curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, $this->cx_param->verify_ssl);
-    curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, $this->cx_param->verify_ssl);
+    curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, $this->cx_params->verify_ssl);
+    curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, $this->cx_params->verify_ssl);
 
     $json = curl_exec($this->ch);
     $info = curl_getinfo($this->ch);
